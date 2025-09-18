@@ -2,8 +2,8 @@
 
 import React, { Fragment, useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
-import { openDB } from "idb";
 import { CryptoCurrencyList, getCryptocurrency, Quote } from "@/app/http/crypto";
+import { getCrypto, saveCryptoCurrency } from "@/app/utils/cryptoIndexDB";
 
 const columns: any = [
 	{
@@ -13,10 +13,10 @@ const columns: any = [
 	},
     {
 		name: 'Name',
-		selector: (row: { name: string, cmcRank: number }) => {
+		selector: (row: { name: string, id: number }) => {
             return (
                 <div className="flex gap-2 items-center">
-                    <img className="w-7 h-7" src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${row.cmcRank}.png`}/>
+                    <img className="w-7 h-7" src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${row.id}.png`} loading="lazy" alt={row.name}/>
                     <span>{row.name}</span>
                 </div>
             )
@@ -68,36 +68,7 @@ const columns: any = [
 ];
 
 const colorUnit = (value: number, symbol: string = "") => {
-    if(value < 0){
-        return <span className="text-red-500">{symbol} {value}</span>
-    }
-
-    return <span className="text-green-700">{symbol} {value}</span>
-}
-
-async function getDB() {
-    return openDB("cryptoDataBase", 1, {
-      upgrade(db) {
-        if (!db.objectStoreNames.contains("cryptoCurrency")) {
-          db.createObjectStore("cryptoCurrency", { keyPath: "cmcRank" });
-        }
-      },
-    });
-}
-
-export async function getCrypto() {
-    const db = await getDB();
-    return db.getAll("cryptoCurrency");
-}
-
-export async function saveCryptoCurrency(cryptoCurrency: CryptoCurrencyList[]) {
-    const db = await getDB();
-    const tx = db.transaction("cryptoCurrency", "readwrite");
-    const store = tx.objectStore("cryptoCurrency");
-    for (const crypto of cryptoCurrency) {
-      await store.put(crypto);
-    }
-    await tx.done;
+    return <span className={`${(value < 0) ? "text-red-500" : "text-green-700"}`}>{symbol} {value}</span>
 }
 
 function Table(){
