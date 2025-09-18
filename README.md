@@ -10,7 +10,7 @@ Install & Run Instructions
 npm i
 ```
 
-## Getting Started
+## Start Dev
 
 ```bash
 npm run dev
